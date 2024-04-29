@@ -22,7 +22,6 @@ Dim Shared CurrentSolutionMode As Integer
 
 Dim Shared Degree As Double
 
-Dim Shared CurrentKeyHit As _Unsigned Long
 
 Type StyleSheets
     Class As String

@@ -113,11 +113,27 @@ Sub UpdateManualSolutionMode ()
 
                     Case Chr$(CurrentKeyHit):
 
-                        CurrentPuzzleSubCellChar = "R"
+                        If ShowAllSubcellNumbers = TRUE Then
+                            
+                            CurrentPuzzleSubCellChar = "R"
+
+                        Else
+
+                            CurrentPuzzleSubCellChar = "0"
+
+                        End If
 
                     Case "R":
 
-                        CurrentPuzzleSubCellChar = "0"
+                        If ShowAllSubcellNumbers = TRUE Then
+                            
+                            CurrentPuzzleSubCellChar = "0"
+
+                        Else
+
+                            CurrentPuzzleSubCellChar = Chr$(CurrentKeyHit)
+
+                        End If
 
                     Case Else:
 
@@ -148,16 +164,32 @@ Sub DrawSubCell (CurrentCell As Integer, SubCell As Integer)
     Select Case CurrentChr
 
         Case "1" To "9":
-            '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(SubCell), CurrentPuzzleCellOverlayImage
+
             _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(SubCell), CurrentPuzzleImage
 
         Case UCase$("R"):
-            '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(SubCell), CurrentPuzzleCellOverlayImage
-            _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(SubCell), CurrentPuzzleImage
+
+            If ShowAllSubcellNumbers = TRUE Then
+
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(SubCell), CurrentPuzzleImage
+
+            Else
+
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(9), CurrentPuzzleImage
+
+            End If
 
         Case Else:
-            '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(SubCell), CurrentPuzzleCellOverlayImage
-            _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(SubCell), CurrentPuzzleImage
+
+            If ShowAllSubcellNumbers = TRUE Then
+
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(SubCell), CurrentPuzzleImage
+
+            Else
+
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(9), CurrentPuzzleImage
+
+            End If
 
     End Select
 
@@ -261,16 +293,32 @@ Sub DrawSmallNumbers (CurrentCell%)
         Select Case CurrentChr
 
             Case "1" To "9":
-                '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(i), CurrentPuzzleCellOverlayImage
+
                 _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(i), CurrentPuzzleImage
 
             Case UCase$("R"):
-                '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(i), CurrentPuzzleCellOverlayImage
-                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(i), CurrentPuzzleImage
+
+                If ShowAllSubcellNumbers = TRUE Then
+
+                    _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(i), CurrentPuzzleImage
+
+                Else
+
+                    _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(9), CurrentPuzzleImage
+
+                End If
 
             Case Else:
-                '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(i), CurrentPuzzleCellOverlayImage
-                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(i), CurrentPuzzleImage
+                
+                If ShowAllSubcellNumbers = TRUE Then
+
+                    _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(i), CurrentPuzzleImage
+
+                Else
+
+                    _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(9), CurrentPuzzleImage
+
+                End If
 
         End Select
 

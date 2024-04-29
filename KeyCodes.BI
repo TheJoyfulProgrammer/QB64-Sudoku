@@ -1,3 +1,6 @@
+Dim Shared CurrentKey As Integer
+Dim Shared CurrentKeyHit As Long
+
 '  KEY RELATED CONST's
 Const KeyESC = 27
 

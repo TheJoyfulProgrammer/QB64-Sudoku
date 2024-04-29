@@ -39,7 +39,14 @@ _Dest WindowImage
 Do
 
     CurrentKeyHit = _KeyHit
-    'If CurrentKeyHit > 0 Then Print "CurrentKeyHit: "; CurrentKeyHit: Print "StatusCurrent: "; StatusCurrent
+
+    If CurrentKeyHit = KeyF3 Then
+
+        ShowAllSubcellNumbers = (ShowAllSubcellNumbers + 1) Mod 2 ' FALSE = 0, TRUE = 1
+
+        DrawPuzzle
+
+    End If
 
     If CurrentKeyHit = KeyF4 Then SolutionMode = (SolutionMode + 1) Mod 2
 

@@ -35,7 +35,7 @@ Dim Shared PuzzlePositionX As Integer
 Dim Shared PuzzlePositionY As Integer
 
 Dim Shared CellNumbersImage(9) As Long
-Dim Shared SubCellNumbersUntestedImage(9) As Long
+Dim Shared SubCellNumbersUntestedImage(10) As Long
 Dim Shared SubCellNumbersValidImage(9) As Long
 Dim Shared SubCellNumbersInvalidImage(9) As Long
 
@@ -58,3 +58,7 @@ Dim Shared PuzzleDirty As Integer
 Dim Shared CurrentPuzzle As _Unsigned Integer
 
 Dim Shared CurrentCellBox As _Unsigned Integer
+
+Dim Shared ShowAllSubcellNumbers as Integer
+
+ShowAllSubcellNumbers = TRUE

@@ -62,6 +62,12 @@ Sub DefineImages
     Dim NumX As Integer
     Dim NumY As Integer
 
+    '  CREATE A BLANK UNTESTED NUMBER
+    SubCellNumbersUntestedImage(9) = _NewImage(SubCellWidth, SubCellHeight, 32)
+
+    _dest SubCellNumbersUntestedImage(9)
+    Line (0, 0)-(SubCellWidth, SubCellHeight), GetColor~&("SubcellUntested"), BF
+
     For I = 0 To 8
 
         CellNumbersImage(I) = _NewImage(CellWidth, CellHeight, 32)
