@@ -1,0 +1,495 @@
+Sub UpdateAISolutionMode ()
+
+    Dim CurrentDest As Long
+
+    CurrentDest = _Dest
+
+    If CurrentSolutionMode <> SOLVEAI Then
+
+        PrintInfo "AI IS NOW PLAYING SUDOKU PUZZLE", _RGB32(157, 255, 220) ' _RGB32(0, 255, 0)
+        PrintInfo "", _RGB32(0, 0, 0)
+        PrintInfo "Press the SPACE BAR to step through the AI play.", _RGB32(155, 188, 242)
+        PrintInfo "", _RGB32(0, 0, 0)
+
+        CurrentSolutionMode = SOLVEAI
+
+    End If
+
+    _Dest CurrentDest
+
+End Sub
+
+
+
+Sub UpdateManualSolutionMode ()
+
+    Dim CurrentDest As Long
+
+    CurrentDest = _Dest
+
+    If CurrentSolutionMode <> SOLVEMANUALLY Then
+
+        PrintInfo "GAME PLAY IN MANUAL MODE", _RGB32(157, 255, 220)
+        PrintInfo "", _RGB32(0, 0, 0)
+        PrintInfo "Use the ARROW keys to move around the board.", _RGB32(155, 188, 242)
+        PrintInfo "Press the number keys to change the status of the", _RGB32(155, 188, 242)
+        PrintInfo "values in the subcells.", _RGB32(155, 188, 242)
+        PrintInfo "", _RGB32(155, 188, 242)
+        'PrintInfo "", _RGB32(155, 188, 242)
+        'PrintInfo "", _RGB32(155, 188, 242)
+        'PrintInfo "", _RGB32(155, 188, 242)
+        'PrintInfo "", _RGB32(155, 188, 242)
+        'PrintInfo "", _RGB32(0, 0, 0)
+
+        CurrentSolutionMode = SOLVEMANUALLY
+
+        DrawPuzzleOverlay CurrentCellBox
+
+    End If
+
+    'Dim CurrentKeyHit As Long
+    'CurrentKeyHit = _KeyHit
+
+    Select Case CurrentKeyHit
+
+        Case KeyArrowRight:
+
+            If ((CurrentCellBox Mod 9) < 8) Then
+                CurrentCellBox = CurrentCellBox + 1
+                DrawPuzzleOverlay CurrentCellBox
+            End If
+
+        Case KeyArrowLeft:
+
+            If ((CurrentCellBox Mod 9) > 0) Then
+                CurrentCellBox = CurrentCellBox - 1
+                DrawPuzzleOverlay CurrentCellBox
+            End If
+
+        Case KeyArrowUp:
+
+            If ((CurrentCellBox - 9) >= 0) Then
+                CurrentCellBox = CurrentCellBox - 9
+                DrawPuzzleOverlay CurrentCellBox
+            End If
+
+        Case KeyArrowDown:
+
+            If ((CurrentCellBox + 9) < 81) Then
+                CurrentCellBox = CurrentCellBox + 9
+                DrawPuzzleOverlay CurrentCellBox
+            End If
+
+        Case KeyEnd:
+            CurrentCellBox = CurrentCellBox - (CurrentCellBox Mod 9) + 8
+            DrawPuzzleOverlay CurrentCellBox
+
+        Case KeyHome:
+            CurrentCellBox = CurrentCellBox - (CurrentCellBox Mod 9)
+            DrawPuzzleOverlay CurrentCellBox
+
+        Case KeyPageUp:
+            CurrentCellBox = CurrentCellBox Mod 9
+            DrawPuzzleOverlay CurrentCellBox
+
+        Case KeyPageDown:
+            CurrentCellBox = (CurrentCellBox Mod 9) + 72
+            DrawPuzzleOverlay CurrentCellBox
+
+        Case 49 To 57:
+
+            If Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, CurrentCellBox + 1, 1) = "0" Then
+
+                Dim CurrentSubCellLocation As Integer
+                Dim CurrentPuzzleSubCellChar As String
+
+                CurrentSubCellLocation = (CurrentKeyHit - 48) * 81 + CurrentCellBox + 1
+
+                Select Case Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, CurrentSubCellLocation, 1)
+
+                    Case "0":
+
+                        CurrentPuzzleSubCellChar = Chr$(CurrentKeyHit)
+
+                    Case Chr$(CurrentKeyHit):
+
+                        CurrentPuzzleSubCellChar = "R"
+
+                    Case "R":
+
+                        CurrentPuzzleSubCellChar = "0"
+
+                    Case Else:
+
+                        CurrentPuzzleSubCellChar = "0"
+
+                End Select
+
+                Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, CurrentSubCellLocation, 1) = CurrentPuzzleSubCellChar
+
+                DrawSubCell CurrentCellBox, CurrentKeyHit - 49
+
+            End If
+
+    End Select
+
+End Sub
+
+
+
+Sub DrawSubCell (CurrentCell As Integer, SubCell As Integer)
+
+    Dim CurrentChr As String
+    Dim CurrentSubCell As Integer
+
+    CurrentSubCell = SubCell + CurrentCell * 9
+    CurrentChr = Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, 81 * (SubCell + 1) + CurrentCell + 1, 1)
+
+    Select Case CurrentChr
+
+        Case "1" To "9":
+            '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(SubCell), CurrentPuzzleCellOverlayImage
+            _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(SubCell), CurrentPuzzleImage
+
+        Case UCase$("R"):
+            '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(SubCell), CurrentPuzzleCellOverlayImage
+            _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(SubCell), CurrentPuzzleImage
+
+        Case Else:
+            '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(SubCell), CurrentPuzzleCellOverlayImage
+            _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(SubCell), CurrentPuzzleImage
+
+    End Select
+
+End Sub
+
+
+
+Sub DrawPuzzleOverlay (CurrentCellBox)
+
+    _Dest CurrentPuzzleOverlayImage
+    _Blend
+    Cls , _RGB32(0, 0, 0)
+    _ClearColor _RGB32(0, 0, 0)
+
+    Dim CurrentCellOverlayColor As _Unsigned Long
+
+    For I = -3 To 3
+
+        Select Case Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, CurrentCellBox + 1, 1)
+
+            Case Is = "0":
+
+                CurrentCellOverlayColor = _RGBA32(0, 255, 0, 224 - Abs(I) * 20)
+
+            Case Else:
+
+                CurrentCellOverlayColor = _RGBA32(255, 255, 0, 224 - Abs(I) * 20)
+
+        End Select
+
+        Line (CellBox(CurrentCellBox).X1 + I - 1, CellBox(CurrentCellBox).Y1 + I - 1)-(CellBox(CurrentCellBox).X2 - I + 1, CellBox(CurrentCellBox).Y2 - I + 1), CurrentCellOverlayColor, B
+    Next
+
+
+End Sub
+
+
+
+Sub SolvePuzzle ()
+End Sub
+
+
+
+Sub DrawPuzzle ()
+
+    Dim CurrentDest As Long
+    Dim i As _Unsigned Integer
+
+    PuzzleDirty = FALSE
+
+    CurrentDest = _Dest
+
+    _Dest CurrentPuzzleImage
+    _PrintMode _KeepBackground
+
+    For i = 0 To UBound(PuzzleBox) - 1
+        Line (PuzzleBox(i).X1, PuzzleBox(i).Y1)-(PuzzleBox(i).X2, PuzzleBox(i).Y2), PuzzleBox(i).BoxColor, BF
+    Next
+
+    DrawCellNumbers
+
+    _Dest CurrentDest
+
+End Sub
+
+
+
+Sub DrawCellNumbers ()
+
+
+    For Row% = 0 To 8
+        For Column% = 0 To 8
+
+            CurrentCell% = Row% * 9 + Column%
+
+            If Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, CurrentCell% + 1, 1) = "0" Then
+                DrawSmallNumbers CurrentCell%
+            Else
+                DrawMediumNumber CurrentCell%
+            End If
+
+        Next
+    Next
+
+End Sub
+
+
+
+Sub DrawSmallNumbers (CurrentCell%)
+
+    Dim i As _Unsigned Integer
+    Dim CurrentChr As String
+    Dim CurrentSubCell As Integer
+
+    For i = 0 To 8
+
+        CurrentSubCell = i + CurrentCell% * 9
+
+        CurrentChr = Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, 81 * (i + 1) + CurrentCell% + 1, 1)
+
+        Select Case CurrentChr
+
+            Case "1" To "9":
+                '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(i), CurrentPuzzleCellOverlayImage
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersValidImage(i), CurrentPuzzleImage
+
+            Case UCase$("R"):
+                '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(i), CurrentPuzzleCellOverlayImage
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersInvalidImage(i), CurrentPuzzleImage
+
+            Case Else:
+                '_PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(i), CurrentPuzzleCellOverlayImage
+                _PutImage (SubCellBox(CurrentSubCell).X1, SubCellBox(CurrentSubCell).Y1), SubCellNumbersUntestedImage(i), CurrentPuzzleImage
+
+        End Select
+
+    Next
+
+End Sub
+
+
+
+Sub DrawMediumNumber (CurrentCell%)
+
+    Dim CurrentValue As Integer
+    CurrentValue = Val(Mid$(SudokuPuzzles(CurrentPuzzle).Puzzle, CurrentCell% + 1, 1)) - 1
+
+    '_PutImage (CellBox(CurrentCell%).X1, CellBox(CurrentCell%).Y1), CellNumbersImage(CurrentValue), CurrentPuzzleCellOverlayImage
+    _PutImage (CellBox(CurrentCell%).X1, CellBox(CurrentCell%).Y1), CellNumbersImage(CurrentValue), CurrentPuzzleImage
+
+End Sub
+
+
+
+Sub AddCellBox (X1 As Integer, Y1 As Integer, BoxColor As _Unsigned Long)
+
+    ReDim _Preserve CellBox(UBound(CellBox) + 1) As Box
+
+    CellBox(UBound(CellBox) - 1).X1 = X1
+    CellBox(UBound(CellBox) - 1).Y1 = Y1
+    CellBox(UBound(CellBox) - 1).X2 = X1 + CellWidth - 1
+    CellBox(UBound(CellBox) - 1).Y2 = Y1 + CellHeight - 1
+    CellBox(UBound(CellBox) - 1).BoxColor = BoxColor
+
+End Sub
+
+
+
+Sub AddSubCellBox (X1 As Integer, Y1 As Integer, BoxColor As _Unsigned Long)
+
+    ReDim _Preserve SubCellBox(UBound(SubCellBox) + 1) As Box
+
+    SubCellBox(UBound(SubCellBox) - 1).X1 = X1
+    SubCellBox(UBound(SubCellBox) - 1).Y1 = Y1
+    SubCellBox(UBound(SubCellBox) - 1).X2 = X1 + SubCellWidth - 1
+    SubCellBox(UBound(SubCellBox) - 1).Y2 = Y1 + SubCellHeight - 1
+    SubCellBox(UBound(SubCellBox) - 1).BoxColor = BoxColor
+
+End Sub
+
+
+
+Sub AddPuzzleBox (X1 As Integer, Y1 As Integer, X2 As Integer, Y2 As Integer, BoxColor As _Unsigned Long)
+
+    ReDim _Preserve PuzzleBox(UBound(PuzzleBox) + 1) As Box
+
+    PuzzleBox(UBound(PuzzleBox) - 1).X1 = X1
+    PuzzleBox(UBound(PuzzleBox) - 1).Y1 = Y1
+    PuzzleBox(UBound(PuzzleBox) - 1).X2 = X2
+    PuzzleBox(UBound(PuzzleBox) - 1).Y2 = Y2
+    PuzzleBox(UBound(PuzzleBox) - 1).BoxColor = BoxColor
+
+End Sub
+
+
+
+Sub DefineBoxes
+
+    '  DEFINE PUZZLE BOX OUTLINE FILL AREA
+    AddPuzzleBox 0, 0, PuzzleWidth - 1, PuzzleHeight - 1, GetColor~&("Border")
+
+    '  DEFINE PUZZLE BACKGROUND
+    AddPuzzleBox BORDERSIZE, BORDERSIZE, PuzzleWidth - BORDERSIZE - 1, PuzzleHeight - BORDERSIZE - 1, GetColor~&("PuzzleBackground")
+
+    '  THE GRID STRINGS CONTAINS THE ELEMENTS OF THE PUZZLE
+    Dim GridH As String
+    Dim GridV As String
+
+    '  BR = BORDERSIZE, CS = CELLSEPARATOR, BS = BOXSEPARATOR
+    '  CW = CELLWIDTH, CH = CELLHEIGHT
+    GridH = "BRCWCSCWCSCWBSCWCSCWCSCWBSCWCSCWCSCWBR"
+    GridV = "BRCHCSCHCSCHBSCHCSCHCSCHBSCHCSCHCSCHBR"
+
+    Dim CurrentY As _Unsigned Integer
+    Dim CurrentCell As _Unsigned Integer
+
+    CurrentY = 0
+    CurrentCell = 0
+
+    Dim VLoop As _Unsigned Integer
+
+    '  DECODE THE FIRST COLUMN ONLY
+    For VLoop = 0 To 18
+
+        Dim GridVPair As String
+
+        GridVPair = Mid$(GridV, VLoop + VLoop + 1, 2)
+
+        Select Case GridVPair
+
+            '  CHECK FOR BORDER SIZE AND ADD IT TO THE CURRENT Y POSITION IF FOUND
+            Case "BR":
+
+                CurrentY = CurrentY + BORDERSIZE
+
+                '  CHECK FOR THE CELL SIZE AND ADD IT TO THE CURRENT Y POSITION IF FOUND
+            Case "CS":
+
+                CurrentY = CurrentY + CELLSEPARATORSIZE
+
+                '  CHECK FOR THE BOX SIZE AND ADD IT TO THE CURRENT Y POSITION IF FOUND
+            Case "BS":
+
+                '  DEFINE HORIZONTAL BOX SEPARATOR LINE
+                AddPuzzleBox BORDERSIZE, CurrentY, PuzzleWidth - BORDERSIZE - 1, CurrentY + BOXSEPARATORSIZE - 1, GetColor~&("BoxSeparator")
+
+                CurrentY = CurrentY + BOXSEPARATORSIZE
+
+                '  CHECK FOR THE CELL HEIGHT AND IF FOUND, START DECODING THE CURRENT ROW
+            Case "CH":
+
+                Dim CurrentX As _Unsigned Integer
+
+                CurrentX = 0
+
+                Dim HLoop As _Unsigned Integer
+
+                For HLoop = 0 To 18
+
+                    Dim GridHPair As String
+
+                    GridHPair = Mid$(GridH, HLoop + HLoop + 1, 2)
+
+                    Select Case GridHPair
+
+                        '  CHECK FOR THE BORDER SIZE AND ADD IT TO THE CURRENT X IF FOUND
+                        Case "BR":
+
+                            CurrentX = CurrentX + BORDERSIZE
+
+                            '  CHECK FOR THE CELL SEPARATOR AND ADD IT TO THE CURRENT X IF FOUND
+                        Case "CS":
+
+                            CurrentX = CurrentX + CELLSEPARATORSIZE
+
+                            '  CHECK FOR THE BOX SIZE AND ADD IT TO THE CURRENT X IF FOUND
+                        Case "BS":
+
+                            '  DEFINE VERTICAL BOX SEPARATOR LINE
+                            AddPuzzleBox CurrentX, BORDERSIZE, CurrentX + BOXSEPARATORSIZE - 1, PuzzleHeight - BORDERSIZE - 1, GetColor~&("BoxSeparator")
+
+                            CurrentX = CurrentX + BOXSEPARATORSIZE
+
+                            '  CHECK FOR THE CELL WIDTH
+                        Case "CW":
+
+                            '  ADD THE CURRENT CELL TO THE CELLBOX ARRAY
+                            AddCellBox CurrentX, CurrentY, GetColor~&("CellCorrect")
+
+                            Dim SubCellX As _Unsigned Integer
+                            Dim SubCellY As _Unsigned Integer
+
+                            '  ADD ALL THE SUBCELLS IF THE CURRENT CELL TO THE SUBCELLBOX ARRAY
+                            For SubCellY = 0 To 2
+                                For SubCellX = 0 To 2
+
+                                    AddSubCellBox CurrentX + SubCellX * SubCellWidth, CurrentY + (2 - SubCellY) * SubCellHeight, _RGB32(Rnd * 128 + 127, Rnd * 128 + 127, Rnd * 128 + 127)
+                                Next
+                            Next
+
+                            '  ADD THE CELLWIDTH TO THE CURRENT X
+                            CurrentX = CurrentX + CellWidth
+                    End Select
+
+                Next
+
+                '  NOW THAT THE CURRENT COLUMN HAS BEEN COMPLETELY DECODED, ADD THE CELL HEIGHT TO THE CURRENT Y
+                CurrentY = CurrentY + CellHeight
+
+        End Select
+    Next
+
+End Sub
+
+
+
+Sub AddPuzzles
+
+    '  SUDOKU PUZZLES ARE DEFINED AS STRINGS WITH A LIENGTH OF 81 CHARACTERS
+    '  THE 0 VALUE REPRESENTS A NON-DEFINED CELL VALUE.
+    AddSudokuPuzzle "089216305000409000006530002891000000003040900000000628900083200000702000102954870"
+    AddSudokuPuzzle "006090030030200700274010869700100200050000080001004005915040627007002040020060900"
+
+End Sub
+
+
+
+Sub AddSudokuPuzzle (Puzzle As String)
+
+    '  INCREASE THE SIZE OF THE SUDOKUPUZZLES ARRAY TO INSERT A NEW PUZZLE
+    ReDim _Preserve SudokuPuzzles(UBound(SudokuPuzzles) + 1) As SudokuPuzzle
+
+    '  SET UP 3-DIMENSIONAL, 9 X 9 X 10 ARRAY DEFINED AS A STRING AND SET ALL
+    '  THE CELL VALUES TO ZERO.
+    '
+    '  THE FIRST 81 CHARACTERS DEFINE THE CURRENT UNSOLVED PUZZLE.
+    '
+    '  THE REMAINING 729 CHARACTERS DEFINE ALL THE SUBCELLS, WHERE THE FIRST 81
+    '  CHARACTERS ARE FOR ALL THE 1'S IN ALL THE CELLS. EACH SET OF 81 CHARACTERS
+    '  AFTER THE 1'S ARE FOR EACH AMD EVERY OTHER NUMBER. THESE SETS ALLOWS US TO
+    '  DEFINE VARIOUS FLAGS FOR THE PUZZLE.
+    '
+    '  FOR EXAMPLE, IF THERE IS A ZERO IN THE NUMBER SPOT, THEN THE SUBCELL NUMBER
+    '  HAS NOT BEEN PLAYED. IF THE NUMBER IS SET IN THE NUMBER SPOT, THEN THE SUB CELL
+    '  VALUE IS DEFINED AS A POSSIBLE PLAY. WE COULD USE A LETTER, LIKE 'R' TO INDICATE
+    '  THE SUBCELL VALUE IS NOT PLAYABLE.
+    SudokuPuzzles(UBound(SudokuPuzzles) - 1).Puzzle = String$(810, "0")
+
+    '  ADD THE CURRENT SUDOKU PUZZLE TO THE BEGINNING OF THE STRING
+    Mid$(SudokuPuzzles(UBound(SudokuPuzzles) - 1).Puzzle, 1, 81) = Puzzle
+
+End Sub
+
+
+

@@ -1,0 +1,16 @@
+Sub PrintInfo (Msg As String, InfoColor As _Unsigned Long)
+
+    Dim CurrentDest As Long
+
+    CurrentDest = _Dest
+
+    _Dest InformationImage
+
+    Color InfoColor
+
+
+    Print Msg
+
+    _Dest CurrentDest
+
+End Sub

@@ -1,0 +1,50 @@
+Sub DrawImage (X As Long, Y As Long, Image As Long, ImageToDrawTo As Long, Scale As Single, Rotation As Single, OriginX As Single, OriginY As Single)
+
+    Dim ImageWidth As Long
+    Dim ImageHeight As Long
+
+    ImageWidth = _Width(Image)
+    ImageHeight = _Height(Image)
+
+    Dim ImageOriginX As Single
+    Dim ImageOriginY As Single
+
+    ImageOriginX = ImageWidth * OriginX
+    ImageOriginY = ImageHeight * OriginY
+
+    Dim PointX(3) As Single
+    Dim PointY(3) As Single
+
+    PointX(0) = -ImageOriginX
+    PointY(0) = -ImageOriginY
+
+    PointX(1) = -ImageOriginX
+    PointY(1) = -ImageOriginY + ImageHeight
+
+    PointX(2) = -ImageOriginX + ImageWidth
+    PointY(2) = -ImageOriginY + ImageHeight
+
+    PointX(3) = -ImageOriginX + ImageWidth
+    PointY(3) = -ImageOriginY
+
+    Dim RotationSin As Single
+    Dim RotationCos As Single
+
+    RotationSin = Sin(-Rotation * Degree)
+    RotationCos = Cos(-Rotation * Degree)
+
+    Dim i As Long
+
+    Dim NewPointX(3) As Single
+    Dim NewPointY(3) As Single
+
+    For i = 0 To 3
+        NewPointX(i) = (PointX(i) * RotationCos + RotationSin * PointY(i)) * Scale + X
+        NewPointY(i) = (PointY(i) * RotationCos - PointX(i) * RotationSin) * Scale + Y
+    Next
+
+    _MapTriangle (0, 0)-(0, ImageHeight - 1)-(ImageWidth - 1, ImageHeight - 1), Image To(NewPointX(0), NewPointY(0))-(NewPointX(1), NewPointY(1))-(NewPointX(2), NewPointY(2)), ImageToDrawTo
+    _MapTriangle (0, 0)-(ImageWidth - 1, 0)-(ImageWidth - 1, ImageHeight - 1), Image To(NewPointX(0), NewPointY(0))-(NewPointX(3), NewPointY(3))-(NewPointX(2), NewPointY(2)), ImageToDrawTo
+
+
+End Sub

@@ -1,0 +1,229 @@
+Sub DefineGlobalData
+
+    AddColors
+    LoadAssets
+    AddPuzzles
+
+    PuzzleIconScale = 0.40
+
+    PuzzleDirty = TRUE
+
+    NumberOfBubbles = 50
+
+    DefineBubbles
+
+    SubCellWidth = SUBCELLMARGINLEFT + GetMaxNumFontWidth~&(GetFontHandle&("Saira", FontSubcellSize)) + SUBCELLMARGINRIGHT
+    SubCellHeight = SUBCELLMARGINTOP + _FontHeight(GetFontHandle&("Saira", FontSubcellSize)) + SUBCELLMARGINBOTTOM
+
+    CellWidth = SubCellWidth * 3
+    CellHeight = SubCellHeight * 3
+
+    BoxWidth = CELLSEPARATORSIZE * 2 + CellWidth * 3
+    BoxHeight = CELLSEPARATORSIZE * 2 + CellHeight * 3
+
+    PuzzleWidth = BORDERSIZE * 2 + BoxWidth * 3 + BOXSEPARATORSIZE * 2
+    PuzzleHeight = BORDERSIZE * 2 + BoxHeight * 3 + BOXSEPARATORSIZE * 2
+
+    PuzzlePositionX = 20
+    PuzzlePositionY = 55
+    InfoBoxPositionX = PuzzlePositionX + PuzzleWidth + 30
+    InfoBoxPositionY = PuzzlePositionY + 10
+
+    InfoWidth = _Width(WindowImage) - InfoBoxPositionX - 30
+    InfoHeight = PuzzleHeight - 20 '_FontHeight(GetFontHandle&("Saira", FontInfoSize)) * 30
+
+    DefineBoxes
+    DefineMenu
+
+End Sub
+
+
+Sub LoadAssets
+
+    AddFontItem "Assets/Saira-Medium.ttf", "Saira"
+
+    Bubble1Image = _LoadImage("Assets/Bubble1-150x150.png", 32)
+
+End Sub
+
+
+
+Sub DefineImages
+
+    CurrentPuzzleImage = _NewImage(PuzzleWidth, PuzzleHeight, 32)
+    CurrentPuzzleOverlayImage = _NewImage(PuzzleWidth, PuzzleHeight, 32)
+    CurrentPuzzleCellOverlayImage = _NewImage(PuzzleWidth, PuzzleHeight, 32)
+    InformationImage = _NewImage(InfoWidth, InfoHeight, 32)
+
+    Dim CurrentDest As Long
+    CurrentDest = _Dest
+
+    Dim NumberWidth As _Unsigned Integer
+    Dim NumX As Integer
+    Dim NumY As Integer
+
+    For I = 0 To 8
+
+        CellNumbersImage(I) = _NewImage(CellWidth, CellHeight, 32)
+        SubCellNumbersUntestedImage(I) = _NewImage(SubCellWidth, SubCellHeight, 32)
+        SubCellNumbersValidImage(I) = _NewImage(SubCellWidth, SubCellHeight, 32)
+        SubCellNumbersInvalidImage(I) = _NewImage(SubCellWidth, SubCellHeight, 32)
+
+
+
+        '  DRAW CELL NUMBERS
+
+        _Dest CellNumbersImage(I)
+        _PrintMode _KeepBackground
+
+        _Font GetFontHandle&("Saira", FontCellSize)
+
+        Line (0, 0)-(CellWidth - 1, CellHeight - 1), GetColor~&("CellCorrect"), BF
+
+        NumberWidth = _PrintWidth(Chr$(I + 49))
+        NumX = Int((CellWidth - NumberWidth) / 2)
+        NumY = Int((CellHeight - _FontHeight(GetFontHandle&("Saira", FontCellSize))) / 2) + 8
+
+        Color GetColor~&("MediumFontCorrect")
+        _PrintString (NumX, NumY), Chr$(I + 49)
+
+
+
+        '  DRAW SUB CELL NUMBERS
+
+        _Dest SubCellNumbersUntestedImage(I)
+        _PrintMode _KeepBackground
+
+        _Font GetFontHandle&("Saira", FontSubcellSize)
+
+        Line (0, 0)-(SubCellWidth, SubCellHeight), GetColor~&("SubcellUntested"), BF
+
+        NumberWidth = _PrintWidth(Chr$(I + 49))
+        NumX = Int((SubCellWidth - NumberWidth) / 2)
+        NumY = Int((SubCellHeight - _FontHeight(GetFontHandle&("Saira", FontSubcellSize))) / 2) + 1
+
+        Color GetColor~&("SmallFontUntested")
+        _PrintString (NumX, NumY), Chr$(I + 49)
+
+
+
+        _Dest SubCellNumbersValidImage(I)
+        _PrintMode _KeepBackground
+
+        _Font GetFontHandle&("Saira", FontSubcellSize)
+
+        Line (0, 0)-(SubCellWidth, SubCellHeight), GetColor~&("SubcellValid"), BF
+
+        Color GetColor~&("SmallFontValid")
+        _PrintString (NumX, NumY), Chr$(I + 49)
+
+
+
+        _Dest SubCellNumbersInvalidImage(I)
+        _PrintMode _KeepBackground
+
+        _Font GetFontHandle&("Saira", FontSubcellSize)
+
+        Line (0, 0)-(SubCellWidth, SubCellHeight), GetColor~&("SubcellInvalid"), BF
+
+        Color GetColor~&("SmallFontInvalid")
+        _PrintString (NumX, NumY), Chr$(I + 49)
+
+    Next
+
+    _Dest CurrentDest
+
+End Sub
+
+
+
+Sub SetupInformation
+
+    Dim CurrentDest As Long
+    CurrentDest = _Dest
+
+    _Dest InformationImage
+
+    Cls , _RGB(0, 0, 0)
+    _Font GetFontHandle&("Saira", FontInfoSize)
+
+    _PrintMode _KeepBackground
+
+    _Dest CurrentDest
+
+End Sub
+
+
+
+Sub UpdatePuzzleScene ()
+
+    Static Rotation As Single
+    Rotation = 0.0
+
+    If PuzzleDirty = TRUE Then DrawPuzzle
+
+    Dim CurrentDest As Long
+
+    CurrentDest = _Dest
+
+    _Dest WindowImage
+
+    Cls , _RGB32(0, 0, 128)
+
+    Dim CurrentBubble As _Unsigned Integer
+
+
+    For CurrentBubble = 0 To UBound(Bubbles) - 1
+
+        DrawImage Bubbles(CurrentBubble).X1, Bubbles(CurrentBubble).Y1, Bubble1Image, WindowImage, Bubbles(CurrentBubble).Scale, Bubbles(CurrentBubble).Rotation, 0.5, 0.5
+
+    Next
+
+    '  WHEN THE TEXT MOVES UP WHEN NEW TEXT IS PRINTED, QB64 FILLS THE NEW LINE AREA WITH BLACK WHILE THE REST
+    '  OF THE BOX IS TRANSPARENT. AS SUCH, WE NEED TO CONSTANTLY SET THE CLEARCOLOR TO MAKE SURE THAT ALL BLACK
+    '  AREAS ARE TRANSPARENT.
+    _ClearColor _RGB(0, 0, 0), InformationImage
+
+    '  DRAW A TRANSLUCENT BOX BEHIND THE INFORMATION BLOCK.
+    Line (InfoBoxPositionX - 10, InfoBoxPositionY - 10)-(InfoBoxPositionX + InfoWidth + 10, InfoBoxPositionY + InfoHeight + 10), _RGBA32(0, 0, 0, 128), BF
+
+    '_SetAlpha 128, , CurrentPuzzleImage
+
+    _PutImage (PuzzlePositionX, PuzzlePositionY), CurrentPuzzleImage, WindowImage
+    '_PutImage (PuzzlePositionX, PuzzlePositionY), CurrentPuzzleCellOverlayImage, WindowImage
+
+    Dim IconPuzzleScale As Single
+    Dim PuzzleX As Integer
+    Dim PuzzleY As Integer
+
+    IconPuzzleScale = 0.25
+    PuzzleX = InfoBoxPositionX
+    PuzzleY = InfoBoxPositionY '+ InfoHeight - (PuzzleHeight * IconPuzzleScale)
+
+    'For y = 0 To 3
+    '   For x = 0 To 2
+
+    '       DrawImage PuzzleX + x * (PuzzleWidth * IconPuzzleScale) + x * 10, PuzzleY + y * (PuzzleHeight * IconPuzzleScale) + y * 10, CurrentPuzzleImage, InformationImage, IconPuzzleScale, Rotation, 0.0, 0.0
+    '       'DrawImage x * (PuzzleWidth * IconPuzzleScale) + x * 10, y * (PuzzleHeight * IconPuzzleScale) + y * 10, CurrentPuzzleImage, InformationImage, IconPuzzleScale, Rotation, 0.0, 0.0
+
+    '   Next
+    'Next
+
+    _PutImage (InfoBoxPositionX, InfoBoxPositionY), InformationImage, WindowImage
+
+    'DrawImage PuzzleX, PuzzleY, CurrentPuzzleImage, IconPuzzleScale, Rotation, 0.0, 0.0
+    'DrawImage InfoBoxPositionX + (InfoWidth - PuzzleWidth * IconPuzzleScale) / 2 - 10, InfoBoxPositionY + InfoHeight - 30 - (PuzzleHeight * IconPuzzleScale), CurrentPuzzleImage, WindowImage, IconPuzzleScale, Rotation, 0.0, 0.0
+    'Rotation = Rotation + 1.0
+
+    If CurrentSolutionMode = SOLVEMANUALLY Then _PutImage (PuzzlePositionX, PuzzlePositionY), CurrentPuzzleOverlayImage, WindowImage
+
+    '  MENU STUFF
+    _PutImage (0, 0), MenuImage, WindowImage
+
+    _Dest CurrentDest
+
+    UpdateBubbles
+
+    _Display
+
+End Sub

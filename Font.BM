@@ -1,0 +1,143 @@
+Function GetFontHandle& (FontName As String, FontSize As _Unsigned Integer)
+
+    Dim FontSizeFound As Integer
+    Dim FontHandle As Long
+
+    FontSizeFound = FALSE
+
+    '  CHECK TO SEE IF THE FONT NAME AND FONT SIZE ALREADY EXISTS IN THE FONTS LIST
+    For I = 0 To UBound(Fonts) - 1
+        If Fonts(I).FontName = FontName And Fonts(I).FontSize = FontSize Then
+            FontSizeFound = TRUE
+            FontHandle = Fonts(I).FontHandle
+        End If
+    Next
+
+    '  IF THE FONT SIZE HAS NOT BE DEFINED IN THE FONTS LIST, ADD IT.
+    If FontSizeFound = FALSE Then
+        AddFont FontName, FontSize
+        FontHandle = Fonts(UBound(Fonts) - 1).FontHandle
+    End If
+
+    '  NOW THAT WE HAVE THE FONT SIZE IN THE LIST, RETURN THE HANDLE TO IT
+    GetFontHandle& = FontHandle
+
+End Function
+
+
+
+Sub AddFontItem (FontFileName As String, FontName As String)
+
+    ReDim _Preserve FontItems(UBound(FontItems) + 1) As FontItem
+
+    Dim CurrentItem As _Unsigned Integer
+
+    CurrentItem = UBound(FontItems) - 1
+
+    FontItems(CurrentItem).FontFile = FontFileName
+    FontItems(CurrentItem).FontName = FontName
+
+End Sub
+
+
+
+Sub AddFont (FontName As String, FontSize As _Unsigned Integer)
+
+    Dim FontFound As Integer
+
+    FontFound = FALSE
+
+    Dim i As _Unsigned Integer
+    Dim CurrentItem As Integer
+
+    '  LET'S CHECK TO SEE IF THE REQUESTED FONT WAS PREVIOUSLY ADDED
+    '  TO THE FONT ITEM LIST.
+    For i = 0 To UBound(FontItems) - 1
+
+        If FontItems(i).FontName = FontName Then
+            FontFound = TRUE
+            CurrentItem = i
+        End If
+
+    Next
+
+    '  IF THE REQUESTED FONT WAS NOT ADDED TO THE FONT ITEM LIST, THEN
+    '  END THE APPLICATION.
+    If FontFound = FALSE Then
+
+        _Dest screenwindowimage
+
+        Print "INTERNAL ERROR: The '"; FontName; "' font was not found!"
+        Print "Please contact the developer."
+
+        End
+
+    End If
+
+    '  LET'S MAKE SURE THE REQUESTED FONTSIZE HASN'T ALREADY BEEN ADDED
+    Dim FontSizeFound As Integer
+
+    FontSizeFound = FALSE
+
+    For i = 0 To UBound(Fonts) - 1
+        If Fonts(i).FontName = FontName And Fonts(i).FontSize = FontSize Then FontSizeFound = TRUE
+    Next
+
+    '  IF FONT AND FONTSIZE ARE NOT FOUND, THEN ADD THEN TO THE FONTS LIST
+    If FontSizeFound = FALSE Then
+
+        ReDim _Preserve Fonts(UBound(Fonts) + 1) As Font
+
+        Dim FontFileName As String
+        Dim CurrentFont As Integer
+
+        CurrentFont = UBound(Fonts) - 1
+
+        Fonts(CurrentFont).FontName = FontName
+        Fonts(CurrentFont).FontSize = FontSize
+        Fonts(CurrentFont).FontHandle = LoadFonts&(FontItems(CurrentItem).FontFile, FontSize)
+        Fonts(CurrentFont).FontNumMaxWidth = GetMaxNumFontWidth~&(Fonts(CurrentFont).FontHandle)
+
+    End If
+
+End Sub
+
+
+
+Function LoadFonts& (Font As String, Size As _Unsigned Integer)
+
+    Dim CurrentFont As Long
+
+    CurrentFont = _LoadFont(Font, Size)
+
+    If CurrentFont < 0 Then
+        Print "ERROR!  Unable to load font: "; Font; " - "; Size; "px"
+        Sleep
+        End
+    End If
+
+    LoadFonts& = CurrentFont
+
+End Function
+
+
+
+Function GetMaxNumFontWidth~& (CurrentFont As Long)
+
+    Dim FontMaxWidth As _Unsigned Integer
+    FontMaxWidth = 0
+
+    OriginalFont = _Font
+
+    _Font CurrentFont
+
+    For i~%% = 0 To 9
+        If _PrintWidth(Chr$(i~%% + 48)) > FontMaxWidth Then FontMaxWidth = _PrintWidth(Chr$(i~%% + 48))
+    Next
+
+    GetMaxNumFontWidth~& = FontMaxWidth
+
+End Function
+
+
+

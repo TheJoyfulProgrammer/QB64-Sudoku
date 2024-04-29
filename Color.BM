@@ -1,0 +1,78 @@
+Function GetColor~& (ColorName As String)
+
+    '  IF COLOR IS NOT DEFINED, THEN THIS FUNTION WILL RETURN A TRANSPARENT BLACK COLOR
+
+    Dim ColorValue As _Unsigned Long
+    Dim i As Integer
+
+    For i = 0 To UBound(Colors) - 1
+        If UCase$(Colors(i).ColorName) = UCase$(ColorName) Then
+            ColorValue = Colors(i).ColorValue
+        End If
+    Next
+
+    GetColor~& = ColorValue
+
+End Function
+
+
+
+Sub AddColor (ColorName As String, ColorValue As _Unsigned Long)
+
+    Dim ColorFound As Integer
+    Dim ColorFoundIndex As _Unsigned Integer
+    Dim i As Integer
+
+    ColorFound = FALSE
+
+    '  CHECK TO SEE IF THE COLOR IS ALREADY IN THE LIST
+    For i = 0 To UBound(Colors) - 1
+        If Colors(i).ColorName = ColorName Then
+            ColorFound = TRUE
+            ColorFoundIndex = i
+        End If
+    Next
+
+    '  IF THE COLOR IS IN THE LIST, THEN CHANGE THE COLOR TO THE NEW VALUE.
+    '  IF NOT, THEN ADD THE COLOR TO THE LIST.
+
+    If ColorFound = TRUE Then
+
+        Colors(ColorFoundIndex).ColorValue = ColorValue
+
+    Else
+
+        ReDim _Preserve Colors(UBound(Colors) + 1) As ColorIndex
+
+        Dim CurrentColor As _Unsigned Integer
+
+        CurrentColor = UBound(Colors) - 1
+
+        Colors(CurrentColor).ColorName = ColorName
+        Colors(CurrentColor).ColorValue = ColorValue
+
+    End If
+
+End Sub
+
+
+
+Sub AddColors ()
+
+    AddColor "Border", _RGB32(255, 255, 255)
+    AddColor "PuzzleBackground", _RGB32(75, 75, 75)
+    AddColor "BoxSeparator", _RGB32(200, 200, 200)
+    AddColor "SmallFontUntested", _RGB32(150, 150, 150)
+    AddColor "SubcellUntested", _RGB32(100, 100, 100)
+    AddColor "SmallFontValid", _RGB32(255, 255, 0)
+    AddColor "SubcellValid", _RGB32(128, 128, 0)
+    AddColor "SmallFontInvalid", _RGB32(255, 0, 0)
+    AddColor "SubcellInvalid", _RGB32(64, 0, 0)
+    AddColor "MediumFontCorrect", _RGB32(0, 200, 0)
+    AddColor "CellCorrect", _RGB32(0, 128, 0)
+    AddColor "MenuItem", _RGB32(255, 247, 212)
+
+End Sub
+
+
+

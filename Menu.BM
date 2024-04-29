@@ -1,0 +1,78 @@
+Sub SetupTestMenu
+
+    Dim MenuHeight As _Unsigned Integer
+    Dim CurrentDest As Long
+
+
+    MenuHeight = _FontHeight(GetFontHandle&("Saira", 24)) + 10
+    MenuImage = _NewImage(_Width(WindowImage), MenuHeight)
+
+    CurrentDest = _Dest
+    _Dest MenuImage
+
+    Line (0, 0)-(_Width(WindowImage), MenuHeight), _RGBA32(0, 0, 0, 128), BF
+
+    _PrintMode _KeepBackground
+
+    Color GetColor~&("MenuItem")
+    _PrintString (10, 7), "FILE         PUZZLE         HELP"
+
+    _Dest CurrentDest
+
+End Sub
+
+
+
+'const NoFlag = 0
+'const NoCommand = -1
+'const OpenSavedGameCommand = 1
+'const SaveGameCommand = 2
+'const NewPuzzleCommand = 3
+'const ExitCommand = 4
+'const HelpCommand = 5
+'const ManualPlayCommand = 6
+'const AIPlayCommand = 7
+Sub DefineMenu
+
+    AddMenuItem 0, "File", NoFlag, "", "CTRL+F", NoCommand
+    AddMenuItem 1, "Open Saved Game", isCommand, "", "CTRL+O", OpenSavedGameCommand
+    AddMenuItem 1, "Save Game", isCommand, "", "CTRL+S", SaveGameCommand
+    AddMenuItem 1, "", isSeparator, "", "", NoCommand
+    AddMenuItem 1, "New Puzzle", isCommand, "", "CTRL+N", NewPuzzleCommand
+    AddMenuItem 1, "Exit", isCommand, "", "CTRL+X", ExitCommand
+    AddMenuItem 0, "Puzzle", NoFlag, "", "CTRL+P", NoCommand
+    AddMenuItem 1, "Switch to Manual Play", isOption, "", "F4", ManualPlayCommand
+    AddMenuItem 1, "Switch to AI", isOption, "", "F4", AIPlayCommand
+    AddMenuItem 0, "Help", isCommand, "", "CTRL+H", HelpCommand
+
+
+End Sub
+
+
+'  ADD MENU ITEM PARAMETERS
+'
+'  MenuItemLevel:  0 = Main Level, all other values are sub menu levels which must be consecutive
+'  Label:          The string the user will see in the menu
+'  Flags:          Provides extra information on the menu item
+'  AccessKeys:     A string that defines keys (on the keyboard) for access - Must be separated by the '+' operator
+'  ShortcutKeys:   A string that defines keys (on the keyboard) for shortcuts - Must be separated by the '+' operator
+'  Command:        An integer value
+Sub AddMenuItem (MenuItemLevel As _Unsigned Integer, Label As String, Flags As _Unsigned Long, AccessKeys As String, ShortcutKeys As String, Command As _Unsigned Integer)
+
+    ReDim _Preserve MenuItems(UBound(MenuItems) + 1) As MenuItem
+
+    Dim CurrentMenuItem As _Unsigned Integer
+    Dim i As _Unsigned Integer
+
+    CurrentMenuItem = UBound(MenuItems) - 1
+
+
+End Sub
+
+
+
+Function GetMenuItemID& (MenuItemLabel As String)
+End Function
+
+
+

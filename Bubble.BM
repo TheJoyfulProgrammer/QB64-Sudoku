@@ -1,0 +1,42 @@
+Sub DefineBubbles
+
+    Dim i As _Unsigned Integer
+    Dim CurrentBubble As _Unsigned Integer
+
+    For i = 1 To NumberOfBubbles
+
+        CurrentBubble = UBound(Bubbles) + 1
+        ReDim _Preserve Bubbles(CurrentBubble) As Bubble
+
+        Bubbles(CurrentBubble).X1 = Rnd * ScreenWidth
+        Bubbles(CurrentBubble).Y1 = Rnd * ScreenHeight
+        Bubbles(CurrentBubble).MoveX = Int(Rnd * 4 + 1)
+        Bubbles(CurrentBubble).MoveY = Int(Rnd * 4 + 1)
+        Bubbles(CurrentBubble).Scale = ((Rnd * 50) + 50) / 100
+        Bubbles(CurrentBubble).Rotation = 0
+        Bubbles(CurrentBubble).BubbleImage = Bubble1Image
+
+        If Int(Rnd * 2 + 1) = 2 Then Bubbles(CurrentBubble).MoveX = -Bubbles(CurrentBubble).MoveX
+        If Int(Rnd * 2 + 1) = 2 Then Bubbles(CurrentBubble).MoveY = -Bubbles(CurrentBubble).MoveY
+
+    Next
+
+End Sub
+
+
+
+Sub UpdateBubbles ()
+
+    Dim CurrentBubble As _Unsigned Integer
+
+    For CurrentBubble = 0 To UBound(Bubbles) - 1
+
+        Bubbles(CurrentBubble).X1 = Bubbles(CurrentBubble).X1 + Bubbles(CurrentBubble).MoveX
+        Bubbles(CurrentBubble).Y1 = Bubbles(CurrentBubble).Y1 + Bubbles(CurrentBubble).MoveY
+
+        If Bubbles(CurrentBubble).X1 <= 0 Or Bubbles(CurrentBubble).X1 >= ScreenWidth Then Bubbles(CurrentBubble).MoveX = -Bubbles(CurrentBubble).MoveX
+        If Bubbles(CurrentBubble).Y1 <= 0 Or Bubbles(CurrentBubble).Y1 >= ScreenHeight Then Bubbles(CurrentBubble).MoveY = -Bubbles(CurrentBubble).MoveY
+
+    Next
+
+End Sub
